@@ -1,0 +1,91 @@
+FROM ubuntu:18.04
+LABEL authors="Akihiro Hayashi <ahayashi@gatech.edu>,Sri Raj Paul <sriraj@gatech.edu>"
+
+RUN apt-get update && apt-get install -y \
+    apt-utils \
+    autoconf \
+    git \
+    libhwloc-dev \
+    libtool \
+    libssl-dev \
+    pkg-config \
+    vim \
+    gcc \
+    g++ \
+    unzip \
+    python3.8 \
+    wget
+
+# PREFIX
+ENV INSTALL_DIR=/root/install
+ENV OMPI_INSTALL_DIR=/root/ompi_install
+
+ENV CC=gcc
+ENV CXX=g++
+
+# libevent
+WORKDIR /root
+RUN wget https://github.com/libevent/libevent/releases/download/release-2.1.12-stable/libevent-2.1.12-stable.tar.gz
+RUN tar xvfz libevent-2.1.12-stable.tar.gz
+WORKDIR libevent-2.1.12-stable
+RUN ./autogen.sh && ./configure --prefix=$INSTALL_DIR && make install
+
+# PMIx
+WORKDIR /root
+RUN wget https://github.com/openpmix/openpmix/releases/download/v4.1.2/pmix-4.1.2.tar.gz
+RUN tar xvfz pmix-4.1.2.tar.gz
+WORKDIR pmix-4.1.2
+RUN ./autogen.pl && ./configure --prefix=$INSTALL_DIR --with-libevent=$INSTALL_DIR && make install
+
+# UCX
+WORKDIR /root
+RUN wget https://github.com/openucx/ucx/releases/download/v1.12.1/ucx-1.12.1.tar.gz
+RUN tar xvfz ucx-1.12.1.tar.gz
+WORKDIR ucx-1.12.1
+RUN ./contrib/configure-release --prefix=$INSTALL_DIR && make install
+
+# OpenMPI (for mpiexec)
+WORKDIR /root
+RUN wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.4.tar.gz
+RUN tar xvfz openmpi-4.1.4.tar.gz
+WORKDIR openmpi-4.1.4
+RUN ./configure --prefix=$OMPI_INSTALL_DIR --without-verbs --with-ucx=$INSTALL_DIR && make install
+
+# SHCOLL
+WORKDIR /root
+RUN git clone https://github.com/tonycurtis/shcoll.git
+WORKDIR /root/shcoll
+RUN ./autogen.sh && ./configure --prefix=$INSTALL_DIR --with-shmemh-dir=$OMPI_INSTALL_DIR/include && make install
+
+# OSSS-UCX
+WORKDIR /root
+RUN git clone https://github.com/openshmem-org/osss-ucx.git
+WORKDIR osss-ucx
+RUN ./autogen.sh && ./configure --prefix=$INSTALL_DIR --with-pmix=$INSTALL_DIR --with-shcoll=$INSTALL_DIR --with-ucx=$INSTALL_DIR --disable-threads --with-heap-size=1G && make install
+
+ENV CC=${INSTALL_DIR}/bin/oshcc
+ENV CXX=${INSTALL_DIR}/bin/oshc++
+ENV OSHRUN=${INSTALL_DIR}/bin/oshrun
+
+WORKDIR /root
+RUN git clone https://github.com/jdevinney/bale.git bale
+WORKDIR /root/bale/src/bale_classic
+RUN ./bootstrap.sh
+RUN python3.8 ./make_bale -s
+ENV BALE_INSTALL=/root/bale/src/bale_classic/build_unknown
+
+WORKDIR /root
+RUN git clone https://github.com/srirajpaul/hclib
+WORKDIR /root/hclib
+RUN git fetch && git checkout bale3_actor
+RUN ./install.sh
+ENV HCLIB_ROOT=/root/hclib/hclib-install
+RUN cd modules/bale_actor && make
+
+WORKDIR /root/hclib/modules/bale_actor/benchmarks
+RUN unzip ../inc/boost.zip -d ../inc/
+
+ENV PATH=${INSTALL_DIR}/bin:$PATH:$OMPI_INSTALL_DIR/bin
+ENV LD_LIBRARY_PATH=${INSTALL_DIR}/lib:$BALE_INSTALL/lib:$HCLIB_ROOT/lib:$HCLIB_ROOT/../modules/bale_actor/lib
+ENV HCLIB_WORKERS=1
+
