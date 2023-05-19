@@ -1,0 +1,16 @@
+#PBS -N oshmem                      # name of job
+#PBS -A GT-vsarkar9                 # account to which job is charged, ex: GT-gburdell3
+#PBS -l nodes=2:ppn=24              # resources allocated, 1 node 2 processors
+##PBS -l pmem=2gb                   # memory per core
+#PBS -l walltime=0:15:00            # job will run at most 15 min
+#PBS -q inferno                     # job is submitted to inferno queue
+#PBS -j oe                          # output and error is combined into the same file
+#PBS -o oshmem.out                  # output file is named gettingStarted.out
+
+echo "Started on `/bin/hostname`"   # prints name of compute node job was started on
+cd $PBS_O_WORKDIR                   # changes into directory where script was submitted from
+
+source ./oshmem.sh
+
+cd ./hclib/modules/bale_actor/test
+oshrun -n 48 ./histo_selector
