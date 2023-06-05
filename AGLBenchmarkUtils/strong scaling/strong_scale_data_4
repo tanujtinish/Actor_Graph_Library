@@ -1,0 +1,11 @@
+srun -N1 -n16 -c1 ./graph500_custom_bfs 26
+
+srun -N2 -n32 -c1 ./graph500_custom_bfs 26
+
+srun -N4 -n64 -c1 ./graph500_custom_bfs 26
+
+srun -N8 -n128 -c1 ./graph500_custom_bfs 26
+
+srun -N16 -n256 -c1 ./graph500_custom_bfs 26
+
+srun -N32 -n512 -c1 ./graph500_custom_bfs 26

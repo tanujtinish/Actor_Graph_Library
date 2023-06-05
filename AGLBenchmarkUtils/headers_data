@@ -1,0 +1,39 @@
+Nodes
+Cores
+SCALE
+graph_generation RMAT non-agl
+construction_time Cyclic non-agl
+bfs mean_time Cyclic non-agl
+bfs harmonic_mean_TEPS Cyclic non-agl
+graph_generation Uniform
+graph_generation RMAT
+construction_time Cyclic
+bfs mean_time Cyclic
+bfs harmonic_mean_TEPS Cyclic
+Average load on PE Cyclic
+Variance load on PE Cyclic
+Highest deviation from Average Cyclic
+construction_time Range
+bfs mean_time Range
+bfs harmonic_mean_TEPS Range
+Average load on PE Range
+Variance load on PE Range
+Highest deviation from Average Range
+construction_time SnakeHashFlipping
+bfs mean_time SnakeHashFlipping
+bfs harmonic_mean_TEPS SnakeHashFlipping
+Average load on PE SnakeHashFlipping
+Variance load on PE SnakeHashFlipping
+Highest deviation from Average SnakeHashFlipping
+construction_time SnakeHashRotation
+bfs mean_time SnakeHashRotation
+bfs harmonic_mean_TEPS SnakeHashRotation
+Average load on PE SnakeHashRotation
+Variance load on PE SnakeHashRotation
+Highest deviation from Average SnakeHashRotation
+construction_time SnakeRotationFlipping
+bfs mean_time SnakeRotationFlipping
+bfs harmonic_mean_TEPS SnakeRotationFlipping
+Average load on PE SnakeRotationFlipping
+Variance load on PE SnakeRotationFlipping
+Highest deviation from Average SnakeRotationFlipping
